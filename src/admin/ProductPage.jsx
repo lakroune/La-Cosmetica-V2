@@ -7,7 +7,8 @@ import Cookies from "js-cookie";
 const ProductPage = () => {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
-
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingId, setEditingId] = useState(null);
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -16,6 +17,7 @@ const ProductPage = () => {
         category_id: "",
         images: []
     });
+    const [existingImages, setExistingImages] = useState([]);
 
     const fetchInitialData = async () => {
         const headers = { Authorization: `Bearer ${Cookies.get("token")}` };
@@ -74,6 +76,61 @@ const ProductPage = () => {
         }
     };
 
+    const handleEdit = (product) => {
+        setIsEditing(true);
+        setEditingId(product.id);
+        setExistingImages(product.images || []);
+
+        setFormData({
+            name: product.name,
+            description: product.description,
+            price: product.price,
+            stock: product.stock,
+            category_id: product.category_id,
+            images: []
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+
+    const updateProduct = async () => {
+        const data = new FormData();
+        data.append("_method", "PUT"); // مهمة بزاف في Laravel مع FormData
+        data.append("name", formData.name);
+        data.append("description", formData.description);
+        data.append("price", formData.price);
+        data.append("stock", formData.stock);
+        data.append("category_id", formData.category_id);
+
+        formData.images.forEach((file) => data.append("images[]", file));
+
+        try {
+            const response = await axios.post(`http://127.0.0.1:8000/api/products/${editingId}`, data, {
+                headers: {
+                    Authorization: `Bearer ${Cookies.get("token")}`,
+                    "Content-Type": "multipart/form-data"
+                },
+            });
+
+            toast.success("Produit modifié avec succès");
+            fetchInitialData();
+            resetForm();
+        } catch (error) {
+            toast.error("Erreur lors de la modification");
+        }
+    };
+     const getImageUrl = (imagePath) => {
+        if (!imagePath) return null;
+        const cleanPath = imagePath.replace(/^\//, '');
+        return `http://127.0.0.1:8000/storage/${cleanPath}`;
+    };
+
+    const resetForm = () => {
+        setFormData({ name: "", description: "", price: "", stock: "", category_id: "", images: [] });
+        setExistingImages([]);
+        setIsEditing(false);
+        setEditingId(null);
+    };
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
             <div className="grid md:grid-cols-3 gap-6">
@@ -98,7 +155,12 @@ const ProductPage = () => {
                                     <td className="p-3 text-sm font-semibold text-blue-600">{p.price} DH</td>
                                     <td className="p-3 text-sm">{p.stock} pcs</td>
                                     <td className="p-3 flex justify-center gap-2">
-                                        <button className="text-blue-500 hover:bg-blue-50 p-1 rounded"><Edit3 size={16} /></button>
+                                        <button
+                                            onClick={() => handleEdit(p)}
+                                            className="text-blue-500 hover:bg-blue-50 p-1 rounded"
+                                        >
+                                            <Edit3 size={16} />
+                                        </button>
                                         <button className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 size={16} /></button>
                                     </td>
                                 </tr>
@@ -109,9 +171,8 @@ const ProductPage = () => {
 
                 <div className="bg-white p-6 border border-gray-100 h-fit sticky top-6 shadow-sm">
                     <h2 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
-                        Add Product
+                        {isEditing ? "Modifier le Produit" : "Add Product"}
                     </h2>
-
                     <div className="flex flex-col gap-3">
                         <div className="flex items-center gap-2 border p-2 focus-within:border-blue-500">
                             <Package size={18} className="text-blue-600" />
@@ -146,18 +207,50 @@ const ProductPage = () => {
 
                         <div className="flex flex-col gap-1">
                             <label className="text-xs text-gray-500 font-medium ml-1 flex items-center gap-1">
-                                <ImageIcon size={14} /> Images (Max 4)
+                                <ImageIcon size={14} /> Images
                             </label>
                             <input type="file" multiple accept="image/*" onChange={addPhotoProduct}
                                 className="text-xs file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
-                            <div className="  grid grid-cols-1 md:grid-cols-2 gap-1">
-                                {formData.images.length > 0 && formData.images.map((f, index) => <img key={index} src={URL.createObjectURL(f)} alt="img" className="w-32 h-32 object-cover mt-2" />)}
+
+                            <div className="grid grid-cols-2 gap-2 mt-2">
+                                {isEditing && existingImages.map((img, index) => (
+                                    <div key={`old-${index}`} className="relative group">
+                                        <img
+                                            src={getImageUrl(img.url)}
+                                            alt="old-product"
+                                            className="w-full h-24 object-cover rounded border border-gray-200 opacity-70"
+                                        />
+                                        <span className="absolute top-1 left-1 bg-gray-800/50 text-[8px] text-white px-1 rounded">Actuelle</span>
+                                    </div>
+                                ))}
+
+                                {formData.images.map((f, index) => (
+                                    <div key={`new-${index}`} className="relative">
+                                        <img
+                                            src={URL.createObjectURL(f)}
+                                            alt="new-preview"
+                                            className="w-full h-24 object-cover rounded border border-blue-200"
+                                        />
+                                        <span className="absolute top-1 left-1 bg-blue-600 text-[8px] text-white px-1 rounded">Nouveau</span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
-                        <button onClick={addProduct} className="bg-blue-600 text-white p-2 font-medium hover:bg-blue-700 transition-all mt-2 rounded">
-                            Enregistrer Produit
-                        </button>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={isEditing ? updateProduct : addProduct}
+                                className={`${isEditing ? ' bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700'} text-white text-sm p-1 flex-1 font-medium transition-all `}
+                            >
+                                {isEditing ? "Mettre à jour" : "Enregistrer Produit"}
+                            </button>
+
+                            {isEditing && (
+                                <button onClick={resetForm} className="bg-gray-200 text-gray-700 p-1  font-medium">
+                                    Annuler
+                                </button>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
