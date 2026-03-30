@@ -2,6 +2,7 @@ import axios from "axios";
 import { ShoppingCart, Eye, LayoutGrid, Search, ShoppingCartIcon, X, Delete } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
+import Cookies from "js-cookie";
 
 const HomePage = () => {
     const [products, setProducts] = useState([]);
@@ -97,6 +98,51 @@ const HomePage = () => {
     }, [isModalOpen, products, isCartOpen]);
 
     const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+    const payNow = async () => {
+        const cart = JSON.parse(localStorage.getItem("cart"));
+        const token = Cookies.get("token");
+        if (!cart || !cart.items || cart.items.length === 0) {
+            toast.error("Votre panier est vide !");
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const response = await axios.post("http://127.0.0.1:8000/api/orders", cart, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            if (response.status === 201 || response.status === 200) {
+                toast.success("Commande passée avec succès !");
+
+                localStorage.removeItem("cart");
+                setCartItems([]);
+                setCartCount(0);
+                setIsCartOpen(false);
+            }
+        } catch (error) {
+            console.error("Order Error:", error);
+            toast.error(error.response?.data?.message || "Erreur lors de la commande");
+        } finally {
+            setLoading(false);
+        }
+    };
+    const removeFromCart = (productId) => {
+        const cart = JSON.parse(localStorage.getItem("cart")) || { items: [] };
+        const updatedItems = cart.items.filter(item => item.product_id !== productId);
+
+        const newCart = { items: updatedItems };
+        localStorage.setItem("cart", JSON.stringify(newCart));
+
+        setCartItems(prev => prev.filter(item => item.id !== productId));
+        setCartCount(updatedItems.length);
+
+        toast.success("Produit retiré");
+    };
     return (
 
 
@@ -112,7 +158,6 @@ const HomePage = () => {
                     </div>
                     <div className=" flex gap-4">
 
-                        {/* Icon Shopping Cart f Navbar */}
                         <div className="relative cursor-pointer" onClick={() => setIsCartOpen(true)}>
                             <ShoppingCartIcon className="text-blue-600" />
                             {cartCount > 0 && (
@@ -148,6 +193,7 @@ const HomePage = () => {
                                                         onClick={() => {
                                                             const newCart = { items: cartItems.filter(i => i.id !== item.id).map(i => ({ product_id: i.id, quantity: i.quantity })) };
                                                             localStorage.setItem("cart", JSON.stringify(newCart));
+                                                            setCartItems(prev => prev.filter(i => i.id !== item.id));
                                                         }}
                                                         className="text-red-400 hover:text-red-600"
                                                     >
@@ -165,10 +211,12 @@ const HomePage = () => {
                                                 <span className="text-gray-600">{totalPrice} DH</span>
                                             </div>
                                             <button
-                                                onClick={() => toast.success("Redirection vers paiement...")}
-                                                className="w-full bg-violet-600 hover:bg-blue-700 text-white py-3 font-bold transition-colors uppercase tracking-widest text-sm"
+                                                onClick={payNow}
+                                                disabled={loading}
+                                                className={`w-full py-3 font-bold transition-colors uppercase tracking-widest text-sm text-white
+                                                   ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-violet-600 hover:bg-violet-700"}`}
                                             >
-                                                Pay Now
+                                                {loading ? "En cours..." : "Pay Now"}
                                             </button>
                                         </div>
                                     )}
