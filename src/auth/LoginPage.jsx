@@ -3,15 +3,18 @@ import { Lock, Mail } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 const LoginPage = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const navigate = useNavigate();
     const submitLesInfo = async () => {
         try {
             const response = await axios.post("http://localhost:8000/api/login", { email, password });
             if (response.status === 200) {
                 toast.success("Connexion reussie!");
                 Cookies.set("token", response.data.access_token);
+                navigate("/");
             }
         } catch (error) {
             toast.error("Email ou mot de passe incorrect");
