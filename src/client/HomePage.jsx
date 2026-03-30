@@ -102,6 +102,11 @@ const HomePage = () => {
     const payNow = async () => {
         const cart = JSON.parse(localStorage.getItem("cart"));
         const token = Cookies.get("token");
+        if (!token) {
+            toast.error("Veuillez vous connecter pour passer une commande");
+            navigate('/login');
+            return;
+        }
         if (!cart || !cart.items || cart.items.length === 0) {
             toast.error("Votre panier est vide !");
             return;
@@ -208,7 +213,7 @@ const HomePage = () => {
                                         <div className="p-2 border-t bg-gray-50 space-y-4">
                                             <div className="flex p-2 justify-between items-center   font-bold">
                                                 <span>Total:</span>
-                                                <span className="text-gray-600">{totalPrice} DH</span>
+                                                <span className="text-gray-600">{totalPrice.toFixed(2)} DH</span>
                                             </div>
                                             <button
                                                 onClick={payNow}

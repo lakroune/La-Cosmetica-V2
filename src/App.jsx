@@ -5,7 +5,8 @@ import ProductPage from "./admin/ProductPage";
 import RegisterPage from "./auth/RegisterPage";
 import CategoryPage from "./admin/CategoryPage";
 import HomePage from "./client/HomePage";
- 
+import MyOrdersPage from "./client/MyOrdersPage";
+
 
 function App() {
   return (
@@ -17,9 +18,11 @@ function App() {
         <Route path="/r" element={<RegisterPage />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/c" element={<CategoryPage />} />
+        <Route path="/o" element={<MyOrdersPage />} />
+
       </Routes>
     </>
-  );    
+  );
 }
 
 export default App;
