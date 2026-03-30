@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ShoppingCart, Eye, LayoutGrid, Search, ShoppingCartIcon, X } from "lucide-react";
+import { ShoppingCart, Eye, LayoutGrid, Search, ShoppingCartIcon, X, Delete } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -14,7 +14,8 @@ const HomePage = () => {
     const [quantity, setQuantity] = useState(1);
     const [searchQuery, setSearchQuery] = useState("");
     const [cartCount, setCartCount] = useState(0);
-
+    const [isCartOpen, setIsCartOpen] = useState(false);
+    const [cartItems, setCartItems] = useState([]);
     useEffect(() => {
         const updateCartCount = () => {
             const cart = JSON.parse(localStorage.getItem("cart")) || { items: [] };
@@ -83,6 +84,19 @@ const HomePage = () => {
         setIsModalOpen(false);
 
     };
+
+    useEffect(() => {
+        const cart = JSON.parse(localStorage.getItem("cart")) || { items: [] };
+        const detailedItems = cart.items.map(cartItem => {
+            const product = products.find(p => p.id === cartItem.product_id);
+            return product ? { ...product, quantity: cartItem.quantity } : null;
+        }).filter(item => item !== null);
+
+        setCartItems(detailedItems);
+        setCartCount(cart.items.length);
+    }, [isModalOpen, products, isCartOpen]);
+
+    const totalPrice = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     return (
 
 
@@ -98,14 +112,69 @@ const HomePage = () => {
                     </div>
                     <div className=" flex gap-4">
 
-                        <div className="relative cursor-pointer">
-                            <ShoppingCartIcon className="text-blue-600 relative" />
+                        {/* Icon Shopping Cart f Navbar */}
+                        <div className="relative cursor-pointer" onClick={() => setIsCartOpen(true)}>
+                            <ShoppingCartIcon className="text-blue-600" />
                             {cartCount > 0 && (
-                                <div className="bg-red-600 w-4 h-4 absolute -top-1 -right-1    -full text-[10px] text-white flex items-center justify-center font-bold">
+                                <div className="bg-red-600 w-4 h-4 absolute -top-1 -right-1 rounded-full text-[10px] text-white flex items-center justify-center font-bold">
                                     {cartCount}
                                 </div>
                             )}
                         </div>
+
+                        {isCartOpen && (
+                            <div className="fixed inset-0 z-[150] overflow-hidden">
+                                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsCartOpen(false)} />
+
+                                <div className="absolute inset-y-0 right-0 max-w-sm w-full bg-white shadow-2xl flex flex-col">
+                                    <div className="p-2 border-b flex justify-between items-center bg-gray-400 text-white">
+                                        <button onClick={() => setIsCartOpen(false)}><X size={24} /></button>
+                                    </div>
+
+                                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                                        {cartItems.length === 0 ? (
+                                            <p className="text-center text-gray-500 mt-10">Votre panier est vide.</p>
+                                        ) : (
+                                            cartItems.map((item) => (
+                                                <div key={item.id} className="flex gap-3 border-b pb-3">
+                                                    <div className="flex-1">
+                                                        <h4 className="text-sm font-bold text-gray-800">{item.name}</h4>
+                                                        <div className="flex justify-between mt-1">
+                                                            <span className="text-xs text-gray-500">{item.quantity} x {item.price} DH</span>
+                                                            <span className="text-sm font-semibold text-blue-600">{item.quantity * item.price} DH</span>
+                                                        </div>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => {
+                                                            const newCart = { items: cartItems.filter(i => i.id !== item.id).map(i => ({ product_id: i.id, quantity: i.quantity })) };
+                                                            localStorage.setItem("cart", JSON.stringify(newCart));
+                                                        }}
+                                                        className="text-red-400 hover:text-red-600"
+                                                    >
+                                                        <Delete size={16} />
+                                                    </button>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+
+                                    {cartItems.length > 0 && (
+                                        <div className="p-2 border-t bg-gray-50 space-y-4">
+                                            <div className="flex p-2 justify-between items-center   font-bold">
+                                                <span>Total:</span>
+                                                <span className="text-gray-600">{totalPrice} DH</span>
+                                            </div>
+                                            <button
+                                                onClick={() => toast.success("Redirection vers paiement...")}
+                                                className="w-full bg-violet-600 hover:bg-blue-700 text-white py-3 font-bold transition-colors uppercase tracking-widest text-sm"
+                                            >
+                                                Pay Now
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                 </div>
