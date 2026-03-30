@@ -2,13 +2,14 @@ import axios from "axios";
 import { Lock, Mail, User } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordConfirmation, setPasswordConfirmation] = useState("");
-
+    const navigate = useNavigate();
     const submitLesInfo = async () => {
         if (password !== passwordConfirmation) {
             return toast.error("Passwords matchawch!");
@@ -22,11 +23,16 @@ const RegisterPage = () => {
                 password_confirmation: passwordConfirmation
             });
 
-            toast.success("Compte t-creea b naja7!");
+            if (response.status === 201) {
+                toast.success("Inscription reussie!");
+                navigate("/login");
+            } else if (response.data.success === success) {
+                toast.error("Inscription echouee!");
+
+            }
             console.log(response.data);
         } catch (error) {
-            const errorMsg = error.response?.data?.message || "Erreur f l-inscription";
-            toast.error(errorMsg);
+            toast.error("Erreur d'inscription");
         }
     };
 
