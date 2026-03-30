@@ -12,7 +12,7 @@ const HomePage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
-
+    const [searchQuery, setSearchQuery] = useState("");
     const [cartCount, setCartCount] = useState(0);
 
     useEffect(() => {
@@ -46,10 +46,16 @@ const HomePage = () => {
         fetchData();
     }, []);
 
-    const filteredProducts = selectedCategory === "all"
-        ? products
-        : products.filter(p => p.category?.slug === selectedCategory || p.category_id == selectedCategory);
-    const openCartModal = (product) => {
+    const filteredProducts = products.filter(p => {
+        const matchesCategory = selectedCategory === "all"
+            || p.category?.slug === selectedCategory
+            || p.category_id == selectedCategory;
+
+        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase())
+            || p.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+        return matchesCategory && matchesSearch;
+    }); const openCartModal = (product) => {
         setSelectedProduct(product);
         setQuantity(1);
         setIsModalOpen(true);
@@ -95,7 +101,7 @@ const HomePage = () => {
                         <div className="relative cursor-pointer">
                             <ShoppingCartIcon className="text-blue-600 relative" />
                             {cartCount > 0 && (
-                                <div className="bg-red-600 w-4 h-4 absolute -top-1 -right-1 rounded-full text-[10px] text-white flex items-center justify-center font-bold">
+                                <div className="bg-red-600 w-4 h-4 absolute -top-1 -right-1    -full text-[10px] text-white flex items-center justify-center font-bold">
                                     {cartCount}
                                 </div>
                             )}
@@ -107,14 +113,21 @@ const HomePage = () => {
             <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
 
                 <div className="relative flex justify-end ">
-                    <div className="flex   border items-center">
-                        <Search size={20} className=" text-blue-600" />
+                    <div className="flex border items-center px-2 bg-white    -md">
+                        <Search size={20} className="text-blue-600" />
                         <input
-                            type="text"
-                            placeholder="Rechercher"
-                            className="  border-gray-300  text-sm outline-none px-2 py-1  "
+                            placeholder="Rechercher un produit..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)} // <--- Hna fin kit-update l-filter
+                            className="text-sm outline-none px-2 py-2 w-full"
                         />
-
+                        {searchQuery && (
+                            <X
+                                size={16}
+                                className="text-gray-400 cursor-pointer hover:text-red-500"
+                                onClick={() => setSearchQuery("")} // Bouton bach t-msah l-recherche
+                            />
+                        )}
                     </div>
                     <select
                         value={selectedCategory}
@@ -153,7 +166,7 @@ const HomePage = () => {
                             const currentImageUrl = product.images?.[currentImgIndex]?.url;
 
                             return (
-                                <div key={product.id} className="bg-white overflow-hidden p-1 group border border-gray-100  -lg shadow-sm">
+                                <div key={product.id} className="bg-white overflow-hidden p-1 group border border-gray-100   ">
                                     <div className="h-48 bg-gray-200 relative   overflow-hidden">
                                         {product.images && product.images.length > 0 ? (
                                             <img
@@ -210,8 +223,8 @@ const HomePage = () => {
                 )}
 
                 {!loading && filteredProducts.length === 0 && (
-                    <div className="text-center py-20 bg-white  -xl border border-dashed">
-                        <p className="text-gray-400">Aucun produit trouvé dans cette catégorie.</p>
+                    <div className="text-center py-20   ">
+                        <p className="text-gray-400 text-[14px]">Aucun produit trouvé dans cette catégorie.</p>
                     </div>
                 )}
             </div>
