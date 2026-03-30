@@ -18,7 +18,7 @@ const ProductPage = () => {
         images: []
     });
     const [existingImages, setExistingImages] = useState([]);
-
+    const [deletingId, setDeletingId] = useState(null);
     const fetchInitialData = async () => {
         const headers = { Authorization: `Bearer ${Cookies.get("token")}` };
         try {
@@ -95,7 +95,7 @@ const ProductPage = () => {
 
     const updateProduct = async () => {
         const data = new FormData();
-        data.append("_method", "PUT"); // مهمة بزاف في Laravel مع FormData
+        data.append("_method", "PUT");
         data.append("name", formData.name);
         data.append("description", formData.description);
         data.append("price", formData.price);
@@ -131,6 +131,25 @@ const ProductPage = () => {
         setIsEditing(false);
         setEditingId(null);
     };
+    const deleteProduct = async (id) => {
+        if (!window.confirm("Êtes-vous sûr de vouloir supprimer ce produit ?")) return;
+
+        try {
+            const response = await axios.delete(`http://127.0.0.1:8000/api/products/${id}`, {
+                headers: { Authorization: `Bearer ${Cookies.get("token")}` }
+            });
+
+            if (response.status === 200 || response.status === 204) {
+                toast.success("Produit supprimé avec succès");
+                setProducts(products.filter((p) => p.id !== id));
+            }
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Erreur lors de la suppression");
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
             <div className="grid md:grid-cols-3 gap-6">
@@ -157,11 +176,17 @@ const ProductPage = () => {
                                     <td className="p-3 flex justify-center gap-2">
                                         <button
                                             onClick={() => handleEdit(p)}
-                                            className="text-blue-500 hover:bg-blue-50 p-1 rounded"
+                                            className="text-blue-500 hover:bg-blue-50 p-1 rounded transition-colors"
                                         >
                                             <Edit3 size={16} />
                                         </button>
-                                        <button className="text-red-500 hover:bg-red-50 p-1 rounded"><Trash2 size={16} /></button>
+
+                                        <button
+                                            onClick={() => deleteProduct(p.slug)}
+                                            className="text-red-500 hover:bg-red-50 p-1 rounded transition-colors"
+                                        >
+                                            <Trash2 size={16} />
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
