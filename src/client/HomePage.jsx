@@ -12,6 +12,17 @@ const HomePage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
+
+    const [cartCount, setCartCount] = useState(0);
+
+    useEffect(() => {
+        const updateCartCount = () => {
+            const cart = JSON.parse(localStorage.getItem("cart")) || { items: [] };
+            setCartCount(cart.items.length);
+        };
+
+        updateCartCount();
+    }, [isModalOpen]);
     const getImageUrl = (imagePath) => {
         if (!imagePath) return null;
         const cleanPath = imagePath.replace(/^\//, '');
@@ -45,8 +56,26 @@ const HomePage = () => {
     };
 
     const addToCart = () => {
+        const existingCart = JSON.parse(localStorage.getItem("cart")) || { items: [] };
+
+        const existingItemIndex = existingCart.items.findIndex(
+            (item) => item.product_id === selectedProduct.id
+        );
+
+        if (existingItemIndex > -1) {
+            existingCart.items[existingItemIndex].quantity += quantity;
+        } else {
+            existingCart.items.push({
+                product_id: selectedProduct.id,
+                quantity: quantity,
+            });
+        }
+
+        localStorage.setItem("cart", JSON.stringify(existingCart));
+
         toast.success(`${quantity} x ${selectedProduct.name} ajouté au panier`);
         setIsModalOpen(false);
+
     };
     return (
 
@@ -63,9 +92,13 @@ const HomePage = () => {
                     </div>
                     <div className=" flex gap-4">
 
-                        <div className=" relative">
-                            <ShoppingCartIcon className=" text-blue-600 relative " />
-                            <div className="bg-red-600 w-3 h-3  absolute top-0 right-0   -full "></div>
+                        <div className="relative cursor-pointer">
+                            <ShoppingCartIcon className="text-blue-600 relative" />
+                            {cartCount > 0 && (
+                                <div className="bg-red-600 w-4 h-4 absolute -top-1 -right-1 rounded-full text-[10px] text-white flex items-center justify-center font-bold">
+                                    {cartCount}
+                                </div>
+                            )}
                         </div>
                     </div>
 
