@@ -78,7 +78,7 @@ const ProductPage = () => {
 
     const handleEdit = (product) => {
         setIsEditing(true);
-        setEditingId(product.id);
+        setEditingId(product.slug);
         setExistingImages(product.images || []);
 
         setFormData({
@@ -119,7 +119,7 @@ const ProductPage = () => {
             toast.error("Erreur lors de la modification");
         }
     };
-     const getImageUrl = (imagePath) => {
+    const getImageUrl = (imagePath) => {
         if (!imagePath) return null;
         const cleanPath = imagePath.replace(/^\//, '');
         return `http://127.0.0.1:8000/storage/${cleanPath}`;
