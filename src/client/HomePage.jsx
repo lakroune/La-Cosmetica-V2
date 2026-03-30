@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ShoppingCart, Eye, LayoutGrid, Search, ShoppingCartIcon } from "lucide-react";
+import { ShoppingCart, Eye, LayoutGrid, Search, ShoppingCartIcon, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -9,6 +9,9 @@ const HomePage = () => {
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [loading, setLoading] = useState(true);
     const [activeImage, setActiveImage] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [quantity, setQuantity] = useState(1);
     const getImageUrl = (imagePath) => {
         if (!imagePath) return null;
         const cleanPath = imagePath.replace(/^\//, '');
@@ -35,8 +38,19 @@ const HomePage = () => {
     const filteredProducts = selectedCategory === "all"
         ? products
         : products.filter(p => p.category?.slug === selectedCategory || p.category_id == selectedCategory);
+    const openCartModal = (product) => {
+        setSelectedProduct(product);
+        setQuantity(1);
+        setIsModalOpen(true);
+    };
 
+    const addToCart = () => {
+        toast.success(`${quantity} x ${selectedProduct.name} ajouté au panier`);
+        setIsModalOpen(false);
+    };
     return (
+
+
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white   p-4 mb-8">
                 <div className="flex justify-between ">
@@ -48,15 +62,7 @@ const HomePage = () => {
                         <a href=""> my order</a>
                     </div>
                     <div className=" flex gap-4">
-                        <div className="flex   border items-center">
-                            <Search size={20} className=" text-blue-600" />
-                            <input
-                                type="text"
-                                placeholder="Rechercher"
-                                className="  border-gray-300  text-sm outline-none px-2 py-1  "
-                            />
 
-                        </div>
                         <div className=" relative">
                             <ShoppingCartIcon className=" text-blue-600 relative " />
                             <div className="bg-red-600 w-3 h-3  absolute top-0 right-0   -full "></div>
@@ -64,6 +70,44 @@ const HomePage = () => {
                     </div>
 
                 </div>
+            </div>
+            <div className="max-w-6xl mx-auto px-6 py-4 flex items-center gap-3">
+
+                <div className="relative flex justify-end ">
+                    <div className="flex   border items-center">
+                        <Search size={20} className=" text-blue-600" />
+                        <input
+                            type="text"
+                            placeholder="Rechercher"
+                            className="  border-gray-300  text-sm outline-none px-2 py-1  "
+                        />
+
+                    </div>
+                    <select
+                        value={selectedCategory}
+                        onChange={(e) => setSelectedCategory(e.target.value)}
+                        className=" border border-gray-300 bg-white  text-gray-700 text-sm     block p-2 px-4 pr-10 outline-none  "
+                    >
+
+                        <option value="all">Toutes les catégories</option>
+                        {categories.map((cat) => (
+                            <option key={cat.id} value={cat.slug || cat.id}>
+                                {cat.name}
+                            </option>
+                        ))}
+                    </select>
+
+
+                </div>
+
+                {selectedCategory !== "all" && (
+                    <button
+                        onClick={() => setSelectedCategory("all")}
+                        className="text-xs text-red-500 hover:underline font-medium"
+                    >
+                        <X size={20} className=" text-red-600" />
+                    </button>
+                )}
             </div>
 
             <div className="max-w-6xl mx-auto px-6 pb-12">
@@ -88,9 +132,13 @@ const HomePage = () => {
                                             <div className="flex items-center justify-center h-full text-gray-400 italic">Pas d'image</div>
                                         )}
 
-                                        <div className="absolute top-2 right-2 bg-white/90 p-1.5  -full text-blue-600 shadow-sm hover:bg-blue-600 hover:text-white transition-colors cursor-pointer">
+                                        <div
+                                            onClick={() => openCartModal(product)}
+                                            className="absolute top-2 right-2 bg-white/90 p-1.5   -full text-blue-600 shadow-sm hover:bg-blue-600 hover:text-white transition-colors cursor-pointer"
+                                        >
                                             <ShoppingCart size={14} />
                                         </div>
+
                                     </div>
 
                                     <div className="grid grid-cols-4 max-h-12 min-h-12 gap-1 mt-1 h-12">
@@ -108,12 +156,18 @@ const HomePage = () => {
 
                                     <div className="p-2">
                                         <h3 className="flex justify-between items-center text-blue-600 font-bold">
-                                            <span className="text-[13px] truncate w-2/3">{product.name}</span>
+                                            <span className="text-[13px] truncate  w-2/3">{product.name}</span>
                                             <span className="text-[12px]">{product.price} DH</span>
                                         </h3>
-                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider">{product.category?.name}</p>
-                                        <p className="text-gray-500 text-[11px] mt-1 line-clamp-2 h-8 leading-tight">
-                                            {product.description}
+                                        <p className="text-[8px] text-gray-400 flex justify-between uppercase tracking-wider">
+                                            <span>{product.category?.name}</span>
+                                            <span>{product.stock} pieces</span>
+
+                                        </p>
+                                        <p className="text-gray-500 text-[11px] mt-1 line-clamp-2  h-8 leading-tight">
+                                            <span>{product.description}</span>
+                                            <span>{product.stock}</span>
+
                                         </p>
                                     </div>
                                 </div>
@@ -128,6 +182,43 @@ const HomePage = () => {
                     </div>
                 )}
             </div>
+            {isModalOpen && selectedProduct && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4 w-full h-full">
+                    <div className="bg-white   min-w-[200px] ">
+                        <div className="p-1 flex justify-end">
+
+                            <button onClick={() => setIsModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                                <X className="  text-red-600 text-xl" />
+                            </button>
+                        </div>
+                        <div className="bg-gray-50      ">
+                            <div className="flex items-center justify-center  ">
+                                <button
+                                    disabled={quantity <= 1}
+                                    onClick={() => setQuantity(q => q - 1)}
+                                    className="w-5 h-5   border bg-white flex items-center justify-center text-xl font-bold disabled:opacity-30"
+                                > - </button>
+
+                                <span className="text-[14px] font-bold text-gray-800 w-12 text-center">{quantity}</span>
+
+                                <button
+                                    disabled={quantity >= selectedProduct.stock}
+                                    onClick={() => setQuantity(q => q + 1)}
+                                    className="w-5 h-5  -full border bg-white flex items-center justify-center text-xl font-bold disabled:opacity-30"
+                                > + </button>
+                            </div>
+                            <div className="flex justify-end gap-2 p-2">
+                                <button
+                                    onClick={addToCart}
+                                    className="  p-0.5  bg-blue-600 text-white  self-end"
+                                >
+                                    Confirmer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
