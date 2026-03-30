@@ -8,7 +8,7 @@ const HomePage = () => {
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState("all");
     const [loading, setLoading] = useState(true);
-
+    const [activeImage, setActiveImage] = useState({});
     const getImageUrl = (imagePath) => {
         if (!imagePath) return null;
         const cleanPath = imagePath.replace(/^\//, '');
@@ -53,13 +53,13 @@ const HomePage = () => {
                             <input
                                 type="text"
                                 placeholder="Rechercher"
-                                className="  border-gray-300  text-sm outline-none px-2 py-1 rounded"
+                                className="  border-gray-300  text-sm outline-none px-2 py-1  "
                             />
 
                         </div>
                         <div className=" relative">
                             <ShoppingCartIcon className=" text-blue-600 relative " />
-                            <div className="bg-red-600 w-3 h-3  absolute top-0 right-0  rounded-full "></div>
+                            <div className="bg-red-600 w-3 h-3  absolute top-0 right-0   -full "></div>
                         </div>
                     </div>
 
@@ -71,56 +71,59 @@ const HomePage = () => {
                     <div className="text-center py-20 text-gray-400">Chargement des produits...</div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {filteredProducts.map((product) => (
-                            <div key={product.id} className="bg-white overflow-hidden     group">
-                                <div className="h-48 bg-gray-200 relative overflow-hidden">
-                                    {product.images && product.images.length > 0 ? (
-                                        <img
-                                            src={getImageUrl(product.images[0].path)}
-                                            alt={product.name}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                                        />
-                                    ) : (
-                                        <div className="flex items-center justify-center h-full text-gray-400 font-light italic">Pas d'image</div>
-                                    )}
-                                    <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded text-xs font-bold text-blue-600 shadow-sm">
-                                        <button className=" border-none bg-transparent ">
-                                            <ShoppingCart size={12} />
-                                        </button>
+                        {filteredProducts.map((product) => {
+                            const currentImgIndex = activeImage[product.id] || 0;
+                            const currentImageUrl = product.images?.[currentImgIndex]?.url;
+
+                            return (
+                                <div key={product.id} className="bg-white overflow-hidden p-1 group border border-gray-100  -lg shadow-sm">
+                                    <div className="h-48 bg-gray-200 relative   overflow-hidden">
+                                        {product.images && product.images.length > 0 ? (
+                                            <img
+                                                src={getImageUrl(currentImageUrl)}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover transition-all duration-300"
+                                            />
+                                        ) : (
+                                            <div className="flex items-center justify-center h-full text-gray-400 italic">Pas d'image</div>
+                                        )}
+
+                                        <div className="absolute top-2 right-2 bg-white/90 p-1.5  -full text-blue-600 shadow-sm hover:bg-blue-600 hover:text-white transition-colors cursor-pointer">
+                                            <ShoppingCart size={14} />
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-4 max-h-12 min-h-12 gap-1 mt-1 h-12">
+                                        {product.images.map((image, index) => (
+                                            <img
+                                                key={index}
+                                                src={getImageUrl(image.url)}
+                                                alt="thumbnail"
+                                                onClick={() => setActiveImage(prev => ({ ...prev, [product.id]: index }))}
+                                                className={`w-full h-full object-cover max-h-12 min-h-12  cursor-pointer border-2 transition-all ${currentImgIndex === index ? "border-blue-500 scale-95" : "border-transparent opacity-70 hover:opacity-100"
+                                                    }`}
+                                            />
+                                        ))}
+                                    </div>
+
+                                    <div className="p-2">
+                                        <h3 className="flex justify-between items-center text-blue-600 font-bold">
+                                            <span className="text-[13px] truncate w-2/3">{product.name}</span>
+                                            <span className="text-[12px]">{product.price} DH</span>
+                                        </h3>
+                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider">{product.category?.name}</p>
+                                        <p className="text-gray-500 text-[11px] mt-1 line-clamp-2 h-8 leading-tight">
+                                            {product.description}
+                                        </p>
                                     </div>
                                 </div>
-                                <div className=" grid grid-cols-4   max-h-20 border" >
-                                    {product.images.map((image, index) => (
-                                        <img
-                                            key={index}
-                                            src={getImageUrl(image.path)}
-                                            alt={product.name}
-                                            className="w-full border border-gray-200 h-full object-cover"
-                                        />
-                                    ))}
-                                </div>
-                                <div className="p-2">
-                                    <h3 className="    flex justify-between  text-blue-600"><span className="font-bold text-[12px]">{product.name} </span > <span>{product.price} DH</span></h3>
-
-                                    <p>
-                                        <span className=" text-xs text-gray-400">{product.category?.name}</span>
-                                    </p>
-                                    <p className="text-gray-500 text-xs mb-4 line-clamp-2 h-8">
-                                        {product.description}
-                                    </p>
-
-                                    <div className="flex items-center justify-between mt-auto">
-
-
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 )}
 
                 {!loading && filteredProducts.length === 0 && (
-                    <div className="text-center py-20 bg-white rounded-xl border border-dashed">
+                    <div className="text-center py-20 bg-white  -xl border border-dashed">
                         <p className="text-gray-400">Aucun produit trouvé dans cette catégorie.</p>
                     </div>
                 )}
