@@ -53,7 +53,7 @@ const MyOrdersPage = () => {
                 <div className="space-y-10">
                     {orders.map((order) => (
                         <div key={order.id} className="border     overflow-hidden  ">
-                            <div className="bg-gray-50  py-1 border-b flex justify-between items-center flex-wrap gap-4">
+                            <div className="bg-gray-50 px-4  py-1 border-b flex justify-between items-center flex-wrap gap-4">
                                 <div className="flex gap-8">
                                     <div>
                                         <p className="text-[10px] text-gray-400 uppercase font-bold">Date</p>
