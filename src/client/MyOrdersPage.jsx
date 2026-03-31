@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Cookies from "js-cookie";
-import { Package, ChevronRight, LayoutGrid, ShoppingCartIcon } from "lucide-react";
+import { Package, ChevronRight, LayoutGrid, ShoppingCartIcon, ZodiacCancer, LucideZodiacVirgo } from "lucide-react";
 import toast from "react-hot-toast";
 
 const MyOrdersPage = () => {
@@ -25,21 +25,13 @@ const MyOrdersPage = () => {
         fetchOrders();
     }, []);
 
-    if (loading) return <div className="text-center py-20 text-gray-400">Chargement...</div>;
+    if (loading) return <div className="text-center flex justify-center items-center gap-2 py-20 text-gray-400">
+        <ZodiacCancer className="animate-spin" />
+        Chargement...</div>;
 
     return (
         <div className="min-h-screen bg-white text-gray-800 font-sans">
-            <div className="flex p-4 justify-between ">
-                <h1 className=" flex gap-2 items-center">
-                    <LayoutGrid /> Cosmetica
-                </h1>
-                <div className="  flex gap-4   text-blue-600  text-[14px]">
-                    <a href=""> Home</a>
-                    <a href=""> my order</a>
-                </div>
-                <div className=" flex gap-4">
-                </div>
-            </div>
+
             <div className="max-w-5xl mx-auto ">
 
 
@@ -103,7 +95,8 @@ const MyOrdersPage = () => {
                 </div>
 
                 {orders.length === 0 && (
-                    <div className="py-20 text-center border-2 border-dashed    ">
+                    <div className=" flex justify-center items-center gap-4 py-20 text-center text-gray-400      ">
+                        <ZodiacCancer className="text-gray-400 text-[90px]  duration-700 ease-in-out animate-spin" />
                         <p className="text-gray-400">Aucune commande trouvée.</p>
                     </div>
                 )}

@@ -95,8 +95,8 @@ const NavBar = () => {
                     <LayoutGrid /> Cosmetica
                 </h1>
                 <div className="  flex gap-4   text-blue-600  text-[14px]">
-                    <a href=""> Home</a>
-                    <a href=""> my order</a>
+                    <a href="/"> Home</a>
+                    <a href="/myorders"> my order</a>
                 </div>
                 <div className=" flex gap-4">
 

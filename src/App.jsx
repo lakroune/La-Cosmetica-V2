@@ -14,16 +14,15 @@ function App() {
     <>
       <Toaster />
       <Routes>
-        <Routes path="/" element={<><NavBar /> <Outlet /></>} >
-          <Route path="l" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/" element={<><NavBar /> <Outlet /></>} >
           <Route path="p" element={<ProductPage />} />
-          <Route path="r" element={<RegisterPage />} />
           <Route path="" element={<HomePage />} />
           <Route path="c" element={<CategoryPage />} />
-          <Route path="o" element={<MyOrdersPage />} />
+          <Route path="myorders" element={<MyOrdersPage />} />
           <Route path="n" element={<NavBar />} />
-        </Routes>
-
+        </Route>
       </Routes>
     </>
   );
