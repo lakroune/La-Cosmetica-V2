@@ -1,5 +1,5 @@
 import { LayoutGrid, ShoppingCartIcon, X, Delete } from "lucide-react";
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
@@ -36,7 +36,7 @@ const NavBar = () => {
             }
         };
         fetchProducts();
-    })
+    }, []);
 
     useEffect(() => {
         const cart = JSON.parse(localStorage.getItem("cart")) || { items: [] };

@@ -80,7 +80,7 @@ const HomePage = () => {
         }
 
         localStorage.setItem("cart", JSON.stringify(existingCart));
-
+        window.dispatchEvent(new Event("cartUpdated"));
         toast.success(`${quantity} x ${selectedProduct.name} ajouté au panier`);
         setIsModalOpen(false);
 
@@ -142,7 +142,7 @@ const HomePage = () => {
             <div className="max-w-6xl mx-auto px-6 pb-12">
                 {loading ? (
                     <div className="   flex items-center justify-center text-2xl gap-2 text-gray-400     text-center text-bold text-sm py-4 " >
-                        <ZodiacCancer  className=" text-blue-60 animate-spin" />
+                        <ZodiacCancer className=" text-blue-60 animate-spin" />
                         Chargement des produits...
                     </div>
                 ) : (
