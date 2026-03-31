@@ -13,6 +13,18 @@ const NavBar = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState([]);
+
+    const [isAuth, setIsAuth] = useState(false);
+    useEffect(() => {
+        const token = Cookies.get("token");
+
+        if (token) {
+            setIsAuth(true);
+
+        } else {
+            setIsAuth(false);
+        }
+    }, []);
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -96,7 +108,7 @@ const NavBar = () => {
                 </h1>
                 <div className="  flex gap-4   text-blue-600  text-[14px]">
                     <a href="/"> Home</a>
-                    <a href="/myorders"> my order</a>
+                    {isAuth && <a href="/myorders"> my order</a>}
                 </div>
                 <div className=" flex gap-4">
 

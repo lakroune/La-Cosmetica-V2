@@ -3,10 +3,25 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { Package, ChevronRight, LayoutGrid, ShoppingCartIcon, ZodiacCancer, LucideZodiacVirgo } from "lucide-react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const MyOrdersPage = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
+
+    const [isAuth, setIsAuth] = useState(false);
+    useEffect(() => {
+        const token = Cookies.get("token");
+
+        if (token) {
+            setIsAuth(true);
+
+        } else {
+            setIsAuth(false);
+            navigate("/");
+        }
+    }, []);
 
     useEffect(() => {
         const fetchOrders = async () => {
