@@ -1,5 +1,5 @@
 import axios from "axios";
-import { ShoppingCart, Eye, LayoutGrid, Search, ShoppingCartIcon, X, Delete } from "lucide-react";
+import { ShoppingCart, Eye, LayoutGrid, Search, ShoppingCartIcon, X, Delete, ZodiacCancer } from "lucide-react";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
@@ -141,7 +141,10 @@ const HomePage = () => {
 
             <div className="max-w-6xl mx-auto px-6 pb-12">
                 {loading ? (
-                    <div className="text-center py-20 text-gray-400">Chargement des produits...</div>
+                    <div className="   flex items-center justify-center text-2xl gap-2 text-gray-400     text-center text-bold text-sm py-4 " >
+                        <ZodiacCancer  className=" text-blue-60 animate-spin" />
+                        Chargement des produits...
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                         {filteredProducts.map((product) => {

@@ -3,6 +3,7 @@ import { useState, useEffect, use } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import Cookies from "js-cookie";
+import { useNavigate } from "react-router-dom";
 
 
 
@@ -13,7 +14,7 @@ const NavBar = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState([]);
-
+    const navigate = useNavigate();
     const [isAuth, setIsAuth] = useState(false);
     useEffect(() => {
         const token = Cookies.get("token");
@@ -64,13 +65,15 @@ const NavBar = () => {
 
 
     const payNow = async () => {
-        const cart = JSON.parse(localStorage.getItem("cart"));
-        const token = Cookies.get("token");
-        if (!token) {
+        if (loading) return;
+        if (!isAuth) {
             toast.error("Veuillez vous connecter pour passer une commande");
             navigate('/login');
             return;
         }
+        const cart = JSON.parse(localStorage.getItem("cart"));
+        const token = Cookies.get("token");
+
         if (!cart || !cart.items || cart.items.length === 0) {
             toast.error("Votre panier est vide !");
             return;
